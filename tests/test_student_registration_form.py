@@ -14,32 +14,6 @@ def given_student_registration_form_opened():
     )
 
 
-def select(element: SeleneElement, /, *, option: str):  # todo: consider option_text
-    element.click()
-    element.all('option').element_by(have.exact_text(option)).click()
-
-
-def autocomplete(element: SeleneElement, /, *, from_: str, to: Optional[str] = None):
-    element.type(from_)
-    browser.all(
-        '.subjects-auto-complete__option'
-    ).element_by(have.text(to or from_)).click()
-
-
-def resource(relative_path):
-    import demoqa_tests
-    from pathlib import Path
-    return (
-        Path(demoqa_tests.__file__)
-        .parent
-        .parent
-        .joinpath('resources/')
-        .joinpath(relative_path)
-        .absolute()
-        .__str__()
-    )
-
-
 def test_register_student():
     given_student_registration_form_opened()
 
@@ -107,3 +81,29 @@ def test_register_student():
     cells_of_row(7).should(have.texts('Picture', 'pexels-vinicius-vieira-ft-3151954.jpg'))
     cells_of_row(8).should(have.texts('Address', '4 Privet Drive'))
     cells_of_row(9).should(have.texts('State and City', 'Uttar Pradesh Lucknow'))
+
+
+def select(element: SeleneElement, /, *, option: str):  # todo: consider option_text
+    element.click()
+    element.all('option').element_by(have.exact_text(option)).click()
+
+
+def autocomplete(element: SeleneElement, /, *, from_: str, to: Optional[str] = None):
+    element.type(from_)
+    browser.all(
+        '.subjects-auto-complete__option'
+    ).element_by(have.text(to or from_)).click()
+
+
+def resource(relative_path):
+    import demoqa_tests
+    from pathlib import Path
+    return (
+        Path(demoqa_tests.__file__)
+        .parent
+        .parent
+        .joinpath('resources/')
+        .joinpath(relative_path)
+        .absolute()
+        .__str__()
+    )
