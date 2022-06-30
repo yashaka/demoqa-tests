@@ -28,7 +28,6 @@ def test_register_student():
 
     browser.element('#userNumber').type('1234567890')
 
-    # browser.element('#dateOfBirthInput').setValue('31 Jul 1980')
     browser.element('#dateOfBirthInput').click()
     browser.element(
         '.react-datepicker__month-select'
@@ -37,6 +36,10 @@ def test_register_student():
         '.react-datepicker__year-select'
     ).all('option').element_by(have.exact_text('1980')).click()
     browser.element(f'.react-datepicker__day--0{31}').click()
+    '''
+    # OR:
+    browser.element('#dateOfBirthInput').perform(command.js.set_value('31 Jul 1980'))
+    '''
 
     autocomplete(browser.element('#subjectsInput'), from_='Chem', to='Chemistry')
     autocomplete(browser.element('#subjectsInput'), from_='Maths')
