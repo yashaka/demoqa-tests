@@ -8,8 +8,9 @@ from selene.support.shared import browser
 def given_student_registration_form_opened():
     browser.open('/automation-practice-form')
     (
-        browser.all('[id^=google_ads][id$=container__],[id$=Advertisement]').with_(timeout=10)
-        .should(have.size_greater_than_or_equal(2))
+        browser.all('[id^=google_ads][id$=container__],[id$=Advertisement]')
+        .with_(timeout=10)
+        .should(have.size_greater_than_or_equal(3))
         .perform(command.js.remove)
     )
 
@@ -30,8 +31,12 @@ def test_register_student():
 
     # browser.element('#dateOfBirthInput').setValue('31 Jul 1980')
     browser.element('#dateOfBirthInput').click()
-    select(browser.element('.react-datepicker__month-select'), option='July')
-    select(browser.element('.react-datepicker__year-select'), option='1980')
+    browser.element(
+        '.react-datepicker__month-select'
+    ).all('option').element_by(have.exact_text('July')).click()
+    browser.element(
+        '.react-datepicker__year-select'
+    ).all('option').element_by(have.exact_text('1980')).click()
     browser.element(f'.react-datepicker__day--0{31}').click()
 
     autocomplete(browser.element('#subjectsInput'), from_='Chem', to='Chemistry')
@@ -56,10 +61,8 @@ def test_register_student():
 
     browser.element('#currentAddress').type('4 Privet Drive')
 
-    browser.element('#state').perform(command.js.scroll_into_view).click()
-    browser.all('[id^=react-select-][id*=-option]').element_by(have.exact_text('Uttar Pradesh')).click()
-    browser.element('#city').perform(command.js.scroll_into_view).click()
-    browser.all('[id^=react-select-][id*=-option]').element_by(have.exact_text('Lucknow')).click()
+    select(browser.element('#state'), option='Uttar Pradesh')
+    select(browser.element('#city'), option='Lucknow')
 
     browser.element('#submit').perform(command.js.click)
 
@@ -69,23 +72,25 @@ def test_register_student():
     )
 
     def cells_of_row(index):
-        return browser.element('.modal-content .table').all('tbody tr')[index].all('td')
+        return browser.element(
+            '.modal-content .table'
+        ).all('tbody tr')[index].all('td')
 
-    cells_of_row(0).should(have.texts('Student Name', 'Harry Potter'))
-    cells_of_row(1).should(have.texts('Student Email', 'theboywholived@hogwarts.edu'))
-    cells_of_row(2).should(have.texts('Gender', 'Male'))
-    cells_of_row(3).should(have.texts('Mobile', '1234567890'))
-    cells_of_row(4).should(have.texts('Date of Birth', '31 July,1980'))
-    cells_of_row(5).should(have.texts('Subjects', 'Chemistry, Maths'))
-    cells_of_row(6).should(have.texts('Hobbies', 'Sports, Reading, Music'))
-    cells_of_row(7).should(have.texts('Picture', 'pexels-vinicius-vieira-ft-3151954.jpg'))
-    cells_of_row(8).should(have.texts('Address', '4 Privet Drive'))
-    cells_of_row(9).should(have.texts('State and City', 'Uttar Pradesh Lucknow'))
+    cells_of_row(0).should(have.exact_texts('Student Name', 'Harry Potter'))
+    cells_of_row(1).should(have.exact_texts('Student Email', 'theboywholived@hogwarts.edu'))
+    cells_of_row(2).should(have.exact_texts('Gender', 'Male'))
+    cells_of_row(3).should(have.exact_texts('Mobile', '1234567890'))
+    cells_of_row(4).should(have.exact_texts('Date of Birth', '31 July,1980'))
+    cells_of_row(5).should(have.exact_texts('Subjects', 'Chemistry, Maths'))
+    cells_of_row(6).should(have.exact_texts('Hobbies', 'Sports, Reading, Music'))
+    cells_of_row(7).should(have.exact_texts('Picture', 'pexels-vinicius-vieira-ft-3151954.jpg'))
+    cells_of_row(8).should(have.exact_texts('Address', '4 Privet Drive'))
+    cells_of_row(9).should(have.exact_texts('State and City', 'Uttar Pradesh Lucknow'))
 
 
 def select(element: SeleneElement, /, *, option: str):  # todo: consider option_text
-    element.click()
-    element.all('option').element_by(have.exact_text(option)).click()
+    element.perform(command.js.scroll_into_view).click()
+    browser.all('[id^=react-select-][id*=-option]').element_by(have.exact_text(option)).click()
 
 
 def autocomplete(element: SeleneElement, /, *, from_: str, to: Optional[str] = None):
