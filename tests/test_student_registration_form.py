@@ -23,9 +23,8 @@ def test_register_student():
     browser.element('#lastName').type('Potter')
     browser.element('#userEmail').type('theboywholived@hogwarts.edu')
 
-    browser.element('#genterWrapper').all(
-        '.custom-radio'
-    ).element_by(have.exact_text('Male')).click()
+    gender = browser.element('#genterWrapper')
+    gender.all('.custom-radio').element_by(have.exact_text('Male')).click()
 
     browser.element('#userNumber').type('1234567890')
 
