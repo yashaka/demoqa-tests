@@ -44,8 +44,7 @@ def test_register_student():
 
     subjects = TagsInput(browser.element('#subjectsInput'))
 
-    subjects.add('Chem', autocomplete='Chemistry')
-    subjects.add('Maths')
+    subjects.add('Chem', autocomplete='Chemistry').add('Maths')
     '''
     # OR:
     subjects = browser.element('#subjectsInput')
@@ -78,8 +77,8 @@ def test_register_student():
     dropdown.autocomplete(browser.element('#city'), option='Lucknow')
     '''
     # OR (future version):
-    Dropdown(browser.element('#state')).select(option='Uttar Pradesh')
-    Dropdown(browser.element('#city')).select(option='Lucknow')
+    Dropdown(browser.element('#state')).select('Uttar Pradesh')
+    Dropdown(browser.element('#city')).select('Lucknow')
     
     # OR (first version):
     select.by_choose(browser.element('#state'), option='Uttar Pradesh')
