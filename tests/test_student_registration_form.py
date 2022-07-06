@@ -1,9 +1,13 @@
+from enum import Enum
+
 from selene import have, command
 from selene.support.shared import browser
 from demoqa_tests.controls import dropdown, TagsInput
 
 
 # from demoqa_tests.controls import tags_input
+from demoqa_tests import utils
+from demoqa_tests.controls.table import Table
 
 
 def given_student_registration_form_opened():
@@ -40,12 +44,24 @@ def test_register_student():
     '''
     # OR:
     browser.element('#dateOfBirthInput').perform(command.js.set_value('31 Jul 1980'))
+    
+    # Some ideas:
+    class Months(Enum):
+        September = 8
+        Aug = 7
+
+    date_of_birth.select_month(Months.Aug)
     '''
 
-    subjects = TagsInput(browser.element('#subjectsInput'))
+    '''
+    subjects = object.__new__(TagsInput)
+    TagsInput.__init__(subjects, browser.element('#subjectsInput'))
+    TagsInput.add(subjects, 'Maths')
+    '''
 
-    subjects.add('Chem', autocomplete='Chemistry')
-    subjects.add('Maths')
+    subjects = TagsInput('subjectsInput')
+    subjects = TagsInput(browser.element('#subjectsInput'))
+    subjects.add('Chem', autocomplete='Chemistry').add('Maths')
     '''
     # OR:
     subjects = browser.element('#subjectsInput')
@@ -67,19 +83,24 @@ def test_register_student():
     '''
 
     browser.element('#uploadPicture').send_keys(
-        resource('pexels-vinicius-vieira-ft-3151954.jpg')
+        utils.paths.resource('pexels-vinicius-vieira-ft-3151954.jpg')
     )
 
     browser.element(
         '#currentAddress'
     ).type('4 Privet Drive').perform(command.js.scroll_into_view)
 
-    dropdown.autocomplete(browser.element('#state'), option='Uttar Pradesh')
-    dropdown.autocomplete(browser.element('#city'), option='Lucknow')
+    state = Dropdown(browser.element('#state'))
+    state.autocomplete(option='Uttar Pradesh')
+    state.autocomplete(option='Delhi')
+    dropdown.autocomplete(browser.element('#state'), option='Delhi')
+    city = Dropdown(browser.element('#city'))
+    city.autocomplete(option='Lucknow')
+    city.autocomplete(option='Foobar')
     '''
     # OR (future version):
-    Dropdown(browser.element('#state')).select(option='Uttar Pradesh')
-    Dropdown(browser.element('#city')).select(option='Lucknow')
+    Dropdown(browser.element('#state')).select('Uttar Pradesh')
+    Dropdown(browser.element('#city')).select('Lucknow')
     
     # OR (first version):
     select.by_choose(browser.element('#state'), option='Uttar Pradesh')
@@ -95,32 +116,25 @@ def test_register_student():
         have.text('Thanks for submitting the form')
     )
 
-    def cells_of_row(index):
-        return browser.element(
-            '.modal-content .table'
-        ).all('tbody tr')[index].all('td')
-
-    cells_of_row(0).should(have.exact_texts('Student Name', 'Harry Potter'))
-    cells_of_row(1).should(have.exact_texts('Student Email', 'theboywholived@hogwarts.edu'))
-    cells_of_row(2).should(have.exact_texts('Gender', 'Male'))
-    cells_of_row(3).should(have.exact_texts('Mobile', '1234567890'))
-    cells_of_row(4).should(have.exact_texts('Date of Birth', '31 July,1980'))
-    cells_of_row(5).should(have.exact_texts('Subjects', 'Chemistry, Maths, Physics'))
-    cells_of_row(6).should(have.exact_texts('Hobbies', 'Sports, Reading, Music'))
-    cells_of_row(7).should(have.exact_texts('Picture', 'pexels-vinicius-vieira-ft-3151954.jpg'))
-    cells_of_row(8).should(have.exact_texts('Address', '4 Privet Drive'))
-    cells_of_row(9).should(have.exact_texts('State and City', 'Uttar Pradesh Lucknow'))
+    modal_dialog = browser.element('.modal-content')
+    results = Table()
 
 
-def resource(relative_path):
-    import demoqa_tests
-    from pathlib import Path
-    return (
-        Path(demoqa_tests.__file__)
-        .parent
-        .parent
-        .joinpath('resources/')
-        .joinpath(relative_path)
-        .absolute()
-        .__str__()
-    )
+    results[2:1]
+    results.cell(2, 1)
+
+    results[2]
+    results.rows[2]
+
+    results.cells_of_row(0).should(have.exact_texts('Student Name', 'Harry Potter'))
+    results.cells_of_row(1).should(have.exact_texts('Student Email', 'theboywholived@hogwarts.edu'))
+    results.cells_of_row(2).should(have.exact_texts('Gender', 'Male'))
+    results.cells_of_row(3).should(have.exact_texts('Mobile', '1234567890'))
+    results.cells_of_row(4).should(have.exact_texts('Date of Birth', '31 July,1980'))
+    results.cells_of_row(5).should(have.exact_texts('Subjects', 'Chemistry, Maths, Physics'))
+    results.cells_of_row(6).should(have.exact_texts('Hobbies', 'Sports, Reading, Music'))
+    results.cells_of_row(7).should(have.exact_texts('Picture', 'pexels-vinicius-vieira-ft-3151954.jpg'))
+    results.cells_of_row(8).should(have.exact_texts('Address', '4 Privet Drive'))
+    results.cells_of_row(9).should(have.exact_texts('State and City', 'Uttar Pradesh Lucknow'))
+
+
