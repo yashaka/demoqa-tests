@@ -1,31 +1,37 @@
-from enum import Enum
-
 from selene import have, command
 from selene.support.shared import browser
-from demoqa_tests.controls import dropdown, TagsInput
-
-
-# from demoqa_tests.controls import tags_input
+from demoqa_tests.data import User
+from demoqa_tests.model.application_manager import app
+from demoqa_tests.model.controls import dropdown
 from demoqa_tests import utils
-from demoqa_tests.controls.table import Table
 
-
-def given_student_registration_form_opened():
-    browser.open('/automation-practice-form')
-    (
-        browser.all('[id^=google_ads][id$=container__],[id$=Advertisement]')
-        .with_(timeout=10)
-        .should(have.size_greater_than_or_equal(3))
-        .perform(command.js.remove)
-    )
+'''
+# Just an example of Fluent PageObject application:
+# BAD (with returning main_page from de_login):
+sign_in_page.do_login('drako.malfoy@gmail.com', 'Cruc1@tu$').add_post('Potter!!!! you must die!!!')
+# GOOD (without Fluent PageObject):
+sign_in_page.do_login('drako.malfoy@gmail.com', 'Cruc1@tu$')
+main_page.add_post('Potter!!!! you must die!!!')
+'''
 
 
 def test_register_student():
-    given_student_registration_form_opened()
+    app.given_student_registration_form_opened()
+    harry_potter = User(
+        first_name='Harry',
+        last_name='Potter',
+        subjects=['Chemistry', 'Maths', 'Physics'],
+    )
 
     # WHEN
-    browser.element('#firstName').type('Harry')
-    browser.element('#lastName').type('Potter')
+    app.form.fill_form(harry_potter)
+    '''
+    # OR:
+    app.form.set_first_name('Harry').set_last_name('Potter')
+    # somewhere later:
+    app.results.should_have_row_with_exact_texts(...)
+    '''
+
     browser.element('#userEmail').type('theboywholived@hogwarts.edu')
 
     gender = browser.element('#genterWrapper')
@@ -50,7 +56,8 @@ def test_register_student():
         September = 8
         Aug = 7
 
-    date_of_birth.select_month(Months.Aug)
+    DatePicker(browser.element('#dateOfBirthInput')).open().select_month(Months.Aug).select_year(1999).select_day(30)
+    form.set_birth_date(30, Months.Aug, 1999)
     '''
 
     '''
@@ -59,10 +66,12 @@ def test_register_student():
     TagsInput.add(subjects, 'Maths')
     '''
 
-    subjects = TagsInput('subjectsInput')
-    subjects = TagsInput(browser.element('#subjectsInput'))
-    subjects.add('Chem', autocomplete='Chemistry').add('Maths')
+    app.form.add_subjects('Chemistry', 'Maths', 'Physics')
+    app.form.should_have_subjects('Chemistry', 'Maths', 'Physics')
     '''
+    # other versions (but locators are wrong below):
+    app.form.subjects.element.should(have.text(''.join(['Chemistry', 'Maths', 'Physics'])))
+    app.form.subjects.should_have_texts('Chemistry', 'Maths', 'Physics')
     # OR:
     subjects = browser.element('#subjectsInput')
     tags_input.add(subjects, from_='Chem', autocomplete='Chemistry')
@@ -90,13 +99,8 @@ def test_register_student():
         '#currentAddress'
     ).type('4 Privet Drive').perform(command.js.scroll_into_view)
 
-    state = Dropdown(browser.element('#state'))
-    state.autocomplete(option='Uttar Pradesh')
-    state.autocomplete(option='Delhi')
-    dropdown.autocomplete(browser.element('#state'), option='Delhi')
-    city = Dropdown(browser.element('#city'))
-    city.autocomplete(option='Lucknow')
-    city.autocomplete(option='Foobar')
+    dropdown.autocomplete(browser.element('#state'), option='Uttar Pradesh')
+    dropdown.autocomplete(browser.element('#city'), option='Lucknow')
     '''
     # OR (future version):
     Dropdown(browser.element('#state')).select('Uttar Pradesh')
@@ -107,34 +111,31 @@ def test_register_student():
     select.by_autocomplete(browser.element('#city'), option='Lucknow')
     '''
 
-    subjects.add('Physics')
-
-    browser.element('#submit').perform(command.js.click)
+    app.form.submit()
 
     # THEN
-    browser.element('#example-modal-sizes-title-lg').should(
-        have.text('Thanks for submitting the form')
-    )
+    app.results.should_have_row_with_exact_texts('Student Name', 'Harry Potter')
+    '''
+    results.table.cells_of_row(1).should(have.exact_texts('Student Name', 'Harry Potter'))
+    results.table.cells_of_row(1).should(have.exact_texts('Student Name', 'Harry Potter'))
+    results.table.cells_of_row(1).should(have.exact_texts('Student Name', 'Harry Potter'))
+    results.table.cells_of_row(1).should(have.exact_texts('Student Name', 'Harry Potter'))
+    '''
 
-    modal_dialog = browser.element('.modal-content')
-    results = Table()
+    '''
+    # Just an example of cell(1, 2) returning another Cell page-object
+    results.cell(1, 2).start_editing().set('new value').save()
+    '''
 
-
-    results[2:1]
-    results.cell(2, 1)
-
-    results[2]
-    results.rows[2]
-
-    results.cells_of_row(0).should(have.exact_texts('Student Name', 'Harry Potter'))
-    results.cells_of_row(1).should(have.exact_texts('Student Email', 'theboywholived@hogwarts.edu'))
-    results.cells_of_row(2).should(have.exact_texts('Gender', 'Male'))
-    results.cells_of_row(3).should(have.exact_texts('Mobile', '1234567890'))
-    results.cells_of_row(4).should(have.exact_texts('Date of Birth', '31 July,1980'))
-    results.cells_of_row(5).should(have.exact_texts('Subjects', 'Chemistry, Maths, Physics'))
-    results.cells_of_row(6).should(have.exact_texts('Hobbies', 'Sports, Reading, Music'))
-    results.cells_of_row(7).should(have.exact_texts('Picture', 'pexels-vinicius-vieira-ft-3151954.jpg'))
-    results.cells_of_row(8).should(have.exact_texts('Address', '4 Privet Drive'))
-    results.cells_of_row(9).should(have.exact_texts('State and City', 'Uttar Pradesh Lucknow'))
+    app.results.table.cells_of_row(1).should(have.exact_texts('Student Name', 'Harry Potter'))
+    app.results.table.cells_of_row(2).should(have.exact_texts('Student Email', 'theboywholived@hogwarts.edu'))
+    app.results.table.cells_of_row(3).should(have.exact_texts('Gender', 'Male'))
+    app.results.table.cells_of_row(4).should(have.exact_texts('Mobile', '1234567890'))
+    app.results.table.cells_of_row(5).should(have.exact_texts('Date of Birth', '31 July,1980'))
+    app.results.table.cells_of_row(6).should(have.exact_texts('Subjects', 'Chemistry, Maths, Physics'))
+    app.results.table.cells_of_row(7).should(have.exact_texts('Hobbies', 'Sports, Reading, Music'))
+    app.results.table.cells_of_row(8).should(have.exact_texts('Picture', 'pexels-vinicius-vieira-ft-3151954.jpg'))
+    app.results.table.cells_of_row(9).should(have.exact_texts('Address', '4 Privet Drive'))
+    app.results.table.cells_of_row(10).should(have.exact_texts('State and City', 'Uttar Pradesh Lucknow'))
 
 

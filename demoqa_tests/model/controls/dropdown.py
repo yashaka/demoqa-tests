@@ -11,4 +11,4 @@ def select(element: Element, /, *, option: str):  # todo: consider option_text
 def autocomplete(element: Element, /, *, option: str):  # todo: consider option_text
     element.element(
         '[id^=react-select-][id*=-input]'
-    ).type(option).press_enter()
+    ).type(option).press_tab()
