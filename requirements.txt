@@ -1,2 +1,2 @@
 pytest
-selene>=2.0.0b10
+selene>=2.0.0b12
