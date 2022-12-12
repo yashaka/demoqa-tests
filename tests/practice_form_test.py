@@ -1,6 +1,6 @@
 from pathlib import Path
 from selene.support.shared import browser
-from selene import have, by
+from selene import have, by, be
 from selene import command
 import os
 import tests
@@ -9,6 +9,7 @@ from tests import resources
 
 def test_student_registration_form():
     browser.open('/automation-practice-form')
+    browser.execute_script('document.querySelector(".body-height").style.transform = "scale(.5)"')
     '''
     # might be also needed:
     '''
@@ -48,8 +49,11 @@ def test_student_registration_form():
     #       and so more natural in context of «happy path»
 
     # todo: refactor to select by text proper checkbox
-    browser.element('[for=hobbies-checkbox-2]').perform(command.js.scroll_into_view)
     browser.element('[for=hobbies-checkbox-2]').click()
+    '''
+    # not needed when scaling:
+    browser.element('[for=hobbies-checkbox-2]').perform(command.js.scroll_into_view)
+    '''
 
     browser.element('#currentAddress').type('Moscowskaya Street 18')
     '''
@@ -72,8 +76,22 @@ def test_student_registration_form():
     browser.element('#react-select-4-option-0').click()
 
     browser.element('#dateOfBirthInput').click()
+    browser.element('.react-datepicker__month-select').click()
+    '''
+    # will not work in firefox
     browser.element('.react-datepicker__month-select').type('May')
+    '''
+    browser.element('.react-datepicker__month-select').all('option').element_by(
+        have.exact_text('May')
+    ).click()
+    browser.element('.react-datepicker__year-select').click()
+    browser.element('.react-datepicker__year-select').all('option').element_by(
+        have.exact_text('1999')
+    ).click()
+    '''
+    # will not work in firefox
     browser.element('.react-datepicker__year-select').type('1999')
+    '''
     browser.element(f'.react-datepicker__day--0{11}').click()
     '''
     # potentially more stable:
@@ -92,7 +110,14 @@ def test_student_registration_form():
     ).type('11 May 1999').press_enter()
     '''
 
-    browser.element('#subjectsInput').type('Computer Science').press_enter()
+    browser.element('#subjectsInput').type('Computer Science')
+    '''
+    # if we want to test that correct partial phrase will be auto-completed
+    browser.element('#subjectsInput').type('Compu')
+    '''
+    browser.all('.subjects-auto-complete__option').element_by(
+        have.exact_text('Computer Science')
+    ).click()
     browser.element('#uploadPicture').set_value(
         os.path.abspath(
             os.path.join(os.path.dirname(tests.__file__), 'resources/foto.jpg')
@@ -110,8 +135,11 @@ def test_student_registration_form():
     browser.element('#uploadPicture').set_value(os.path.abspath('../resources/foto.jpg'))
     '''
 
-    browser.element('#submit').press_enter()
+    browser.element('#submit').click()
     '''
+    # not needed when scaling:
+    browser.element('#submit').press_enter()
+    # as this also:
     # OR maybe more obvious:
     browser.element('#submit').perform(command.js.click)
     '''
