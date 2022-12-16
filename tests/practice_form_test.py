@@ -1,28 +1,14 @@
-from pathlib import Path
 from selene.support.shared import browser
-from selene import have, by, be
-from selene import command
+from selene import have
 import os
 import tests
-from tests import resources
+import demoqa_tests.model.controls.dropdown
+from demoqa_tests.model.pages import practice_form
+from demoqa_tests.model.controls.dropdown import select
 
 
 def test_student_registration_form():
-    browser.open('/automation-practice-form')
-    browser.execute_script('document.querySelector(".body-height").style.transform = "scale(.5)"')
-    '''
-    # might be also needed:
-    '''
-    browser.all('[id^=google_ads][id$=container__]').with_(timeout=10).wait_until(
-        have.size_greater_than_or_equal(3)
-    )
-    browser.all('[id^=google_ads][id$=container__]').perform(command.js.remove)
-    '''
-    # if we are sure that there will be >= 3 ads
-    browser.all('[id^=google_ads][id$=container__]').with_(timeout=10).should(
-        have.size_greater_than_or_equal(3)
-    ).perform(command.js.remove)
-    '''
+    practice_form.given_opened()
 
     # WHEN
     browser.element('#firstName').type('Olga')
@@ -62,18 +48,8 @@ def test_student_registration_form():
     browser.element('#currentAddress').perform(command.js.set_value('Moscowskaya Street 18'))
     '''
 
-    browser.element('#state').click()
-    browser.all('[id^=react-select][id*=option]').element_by(
-        have.exact_text('NCR')
-    ).click()
-    '''
-    # BAD:P
-    browser.element('//*[contains(@id,"react-select") and contains(@id, "option") and text()="NCR"]').click()
-    '''
-
-    # todo: refactor to same style as for #state
-    browser.element('#city').click()
-    browser.element('#react-select-4-option-0').click()
+    practice_form.select_state('NCR')
+    select('#city', 'Delhi')
 
     browser.element('#dateOfBirthInput').click()
     browser.element('.react-datepicker__month-select').click()
@@ -118,6 +94,7 @@ def test_student_registration_form():
     browser.all('.subjects-auto-complete__option').element_by(
         have.exact_text('Computer Science')
     ).click()
+    # browser.element('#uploadPicture').set_value(resource.path('foto.jpg'))
     browser.element('#uploadPicture').set_value(
         os.path.abspath(
             os.path.join(os.path.dirname(tests.__file__), 'resources/foto.jpg')
@@ -135,7 +112,7 @@ def test_student_registration_form():
     browser.element('#uploadPicture').set_value(os.path.abspath('../resources/foto.jpg'))
     '''
 
-    browser.element('#submit').click()
+    practice_form.submit()
     '''
     # not needed when scaling:
     browser.element('#submit').press_enter()
@@ -264,3 +241,6 @@ def test_student_registration_form():
     browser.element('.modal-content').element('.table').all('tr').all('td').should(...)
     ############################################################################
     '''
+    demoqa_tests.model.controls.dropdown.select
+
+
