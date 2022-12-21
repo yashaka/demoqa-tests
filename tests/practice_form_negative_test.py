@@ -1,3 +1,5 @@
+from demoqa_tests.data import users
+from demoqa_tests.model import controls, pages
 from demoqa_tests.model.pages import practice_form
 
 
@@ -13,8 +15,14 @@ def test_student__registers_after_fixing_validation_errors_of_required_fields_no
     # fill some fields
 
     # browser.element('#submit').click()
+    admin = users.admin
 
     practice_form.submit_data('Olga', 'YA', 'mail@example.com')
+    practice_form.submit_data(admin)
+
+    pages.practice_form.select_hobbies('Sports', 'Music')
+
+    controls.checkboxes.select(practice_form.hobbies, by_texts=('Sports', 'Music'))
 
     # practice_form.submit()
 

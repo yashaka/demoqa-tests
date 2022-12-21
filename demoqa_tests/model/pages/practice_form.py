@@ -1,7 +1,10 @@
+from datetime import date, datetime
+
 from selene import have, command
 from selene.support.shared import browser
 
-from demoqa_tests.model.controls import dropdown
+from demoqa_tests.model import controls
+from demoqa_tests.model.controls import dropdown, radio, checkboxes, datepicker
 
 '''
 submit = browser.element('#submit')
@@ -22,14 +25,36 @@ def given_opened():
     )
     ads.perform(command.js.remove)
 
+'''
+def select_gender(gender):
+    browser.all('[name=gender]').element_by(have.value(gender)).element('..').click()
+'''
+
+gender = 'gender'
+hobbies = browser.all('[for^=hobbies-checkbox]')
+
+def select_gender(gender):
+    radio.select('gender', by_value=gender)
+
+
+def select_hobbies(*texts: str):
+    checkboxes.select(hobbies, by_texts=texts)
+
 
 def submit():
     browser.element('#submit').click()
 
 
-def submit_data(first_name, last_name, email, **data):
+def submit_data(first_name, last_name, hobbies):
     """todo: implement"""
+    # select_hobbies(hobbies)
+    # radio.select(...)
+    # checkboxes.select(..)
+    # datepicker.select(...)
 
+
+def select_birthday(*, month, year, day):
+    datepicker.select('#dateOfBirthInput', month=month, year=year, day=day)
 
 
 def should_have_validations_of_number(number: int):
